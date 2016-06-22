@@ -8,34 +8,45 @@
 #import <Foundation/Foundation.h>
 @import CoreData;
 
-// callback type for core data stack init completion
-typedef void (^CoreDataStackInitCallbackBlock)(void);
+/// Callback type for core data stack init completion
+typedef void (^CoreDataStackInitCallbackBlock)(BOOL success, NSError * _Nullable error);
 
 @interface KTZCoreDataStack : NSObject
 
-// used for all user interaction
+/// Used for all user interaction
 @property (readonly, strong, nonatomic, nonnull) NSManagedObjectContext *managedObjectContext;
 
-/**
- * Inits core data stack and calls optional callback when finished.
- * Equivilant to calling `[initWithInMemoryStore:NO synchronously:NO callback:callback]`
- */
-- (id _Nonnull)initWithCallback:(CoreDataStackInitCallbackBlock _Nullable)callback;
-
+/// Used for performing work on background context
+@property (readonly, strong, nonatomic, nonnull) NSManagedObjectContext *backgroundWorkerContext;
 
 /**
- * Inits core data stack and calls optional callback when finished.
- * 
- * Parameter inMemory: YES if stack should use in-memory storage, NO to use SQLite backed store.
- * Parameter synchronously: YES to bring up stack on calling thread synchronously, NO to bring up on high-priority background queue.
+ Inits core data stack and calls optional callback when finished.
+ 
+ @note This is equivilant to calling @code initWithDataModelFilename:storeFilename:inMemoryStore:dumpInvalidStore:callback @endcode w/ inMemoryStore set to NO and dumpInvalidStore set to YES.
+ @param dataModelFilename: Name of .xcdatamodel file to associate w/ core data stack
+ @param storeFilename: Name of file which will be saved to disk, can be found in `Documents/DataStore/{storeFilename}`
+ @param callback: The block which is called after opening the store has failed or succeeded.
  */
-- (id _Nonnull)initWithInMemoryStore:(BOOL)inMemory synchronously:(BOOL)synchronously callback:(CoreDataInitCallbackBlock _Nullable)callback;
+- (id _Nonnull)initWithDataModelFilename:(NSString * _Nonnull)dataModelFilename
+                           storeFilename:(NSString * _Nonnull)storeFilename
+                                callback:(CoreDataStackInitCallbackBlock _Nullable)callback;
 
-// saves both main context and private context (which will save to disk)
-- (void)save;
+/**
+ Inits core data stack and calls optional callback when finished.
+ 
+ @param dataModelFilename: Name of .xcdatamodel file to associate w/ core data stack
+ @param storeFilename: Name of file which will be saved to disk, can be found in 'Documents/DataStore/{storeFilename}'
+ @param inMemory: Set to YES if the stack should use in-memory storage, NO to use SQLite backed store.
+ @param dumpInvalidStore: Set to YES if the original SQLite file should be deleted if it can't be opened on the first try. Only use this feature if your data is reproduceable (from server, backup, etc.).
+ @param callback: The block which is called after opening the store has failed or succeeded.
+ */
+- (id _Nonnull)initWithDataModelFilename:(NSString * _Nonnull)dataModelFilename
+                           storeFilename:(NSString * _Nonnull)storeFilename
+                           inMemoryStore:(BOOL)inMemory
+                        dumpInvalidStore:(BOOL)dumpInvalidStore
+                                callback:(CoreDataStackInitCallbackBlock _Nullable)callback;
 
-// these should be overridden by the subclass
-- (NSString * _Nonnull)dataModelFilename;
-- (NSString * _Nonnull)storeFilename;
+/// Saves both main context and private context (which will save to disk)
+- (void)saveToDisk;
 
 @end

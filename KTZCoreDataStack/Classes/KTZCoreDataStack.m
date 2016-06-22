@@ -20,8 +20,8 @@
 // used for non-blocking writes to disk
 @property (nonatomic, strong) NSManagedObjectContext *privateDiskContext;
 
-// callback used after stack init
-@property (nonatomic, strong) CoreDataStackInitCallbackBlock initCallback;
+// used for performing work on background context
+@property (nonatomic, strong) NSManagedObjectContext *backgroundWorkerContext;
 
 @end
 
@@ -30,23 +30,40 @@
 
 #pragma mark - Init
 
-- (id)initWithCallback:(CoreDataStackInitCallbackBlock)callback {
-    return [self initWithInMemoryStore:NO synchronously:NO callback:callback];
+- (id)initWithDataModelFilename:(NSString *)dataModelFilename
+                  storeFilename:(NSString *)storeFilename
+                       callback:(CoreDataStackInitCallbackBlock)callback
+{
+    return [self initWithDataModelFilename:dataModelFilename
+                             storeFilename:storeFilename
+                             inMemoryStore:NO
+                          dumpInvalidStore:YES
+                                  callback:callback];
 }
 
-- (id)initWithInMemoryStore:(BOOL)inMemory synchronously:(BOOL)synchronously callback:(CoreDataInitCallbackBlock)callback {
+- (id _Nonnull)initWithDataModelFilename:(NSString *)dataModelFilename
+                           storeFilename:(NSString *)storeFilename
+                           inMemoryStore:(BOOL)inMemory
+                        dumpInvalidStore:(BOOL)dumpInvalidStore
+                                callback:(CoreDataStackInitCallbackBlock)callback
+{
     self = [super init];
-    
-    [self setInitCallback:callback];
-    [self ktz_initializeCoreDataInMemory:inMemory synchronously:synchronously];
+    [self ktz_initializeCoreDataInMemory:inMemory
+                        dumpInvalidStore:dumpInvalidStore
+                       dataModelFilename:dataModelFilename
+                           storeFilename:storeFilename
+                                callback:callback];
     
     return self;
 }
 
-- (void)ktz_initializeCoreDataInMemory:(BOOL)inMemory synchronously:(BOOL)synchronously {
-    if (self.managedObjectContext) return;
-    
-    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:self.dataModelFilename withExtension:@"momd"];
+- (void)ktz_initializeCoreDataInMemory:(BOOL)inMemory
+                      dumpInvalidStore:(BOOL)dumpInvalidStore
+                     dataModelFilename:(NSString *)dataModelFilename
+                         storeFilename:(NSString *)storeFilename
+                              callback:(CoreDataStackInitCallbackBlock)callback
+{
+    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:dataModelFilename withExtension:@"momd"];
     self.managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
     NSAssert(self.managedObjectModel, @"%@:%s No model to generate a store from", [self class], __PRETTY_FUNCTION__);
     
@@ -54,16 +71,19 @@
     NSAssert(self.coordinator, @"Failed to initialize coordinator");
     
     // init contexts
-    self.managedObjectContext   = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
-    self.privateDiskContext     = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    self.managedObjectContext       = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+    self.privateDiskContext         = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    self.backgroundWorkerContext    = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     
     // setup contexts parents
     [self.privateDiskContext setPersistentStoreCoordinator:self.coordinator];
     [self.managedObjectContext setParentContext:self.privateDiskContext];
+    [self.backgroundWorkerContext setParentContext:self.managedObjectContext];
     
-    // setup is done inside this block so we can do it synchronously or asynchronously below
-    void(^setupStack)() = ^() {
-        NSPersistentStoreCoordinator *psc = self.privateDiskContext.persistentStoreCoordinator;
+    __weak __typeof(self)weakSelf = self;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        if (!weakSelf) { return; }
+        NSPersistentStoreCoordinator *psc = weakSelf.privateDiskContext.persistentStoreCoordinator;
         NSMutableDictionary *options = [NSMutableDictionary dictionary];
         options[NSMigratePersistentStoresAutomaticallyOption]   = @YES;
         options[NSInferMappingModelAutomaticallyOption]         = @YES;
@@ -78,18 +98,22 @@
                            attributes:nil
                                 error:nil];
         
-        NSURL *storeUrl = [docUrl URLByAppendingPathComponent:self.storeFilename];
-        NSLog(@"opening store URL: %@", storeUrl);
-        
+        // attempt to open store normally
+        NSURL *storeUrl = [docUrl URLByAppendingPathComponent:storeFilename];
         NSError *firstTryError = nil;
         NSString *storeType = inMemory ? NSInMemoryStoreType : NSSQLiteStoreType;
+        if (inMemory) {
+            NSLog(@"opening core data store in memory");
+        } else {
+            NSLog(@"opening core data store at URL: %@", storeUrl);
+        }
         [psc addPersistentStoreWithType:storeType
                           configuration:nil
                                     URL:storeUrl
                                 options:options
                                   error:&firstTryError];
         
-        if (firstTryError) {
+        if (firstTryError && dumpInvalidStore) {
             // remove the old store (all of our data can be re-built)
             [manager removeItemAtURL:storeUrl
                                error:nil];
@@ -101,50 +125,27 @@
                                     options:options
                                       error:&secondTryError];
             
-            NSAssert(secondTryError == nil,
-                     @"Error initializing PSC: %@\n%@",
-                     secondTryError.localizedDescription,
-                     secondTryError.userInfo);
-        }
-        
-        // return early if no callback
-        if (!self.initCallback) return;
-     
-        if (synchronously) {
-            self.initCallback();
+            // respond w/ error
+            dispatch_async(dispatch_get_main_queue(), ^{
+                callback(NO, secondTryError);
+            });
         } else {
-            // dispatch_sync wait for our UI thread to be ready
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                self.initCallback();
+            // respond w/ error if user didn't want to delete outdated/corrupt store
+            dispatch_async(dispatch_get_main_queue(), ^{
+                callback(NO, firstTryError);
             });
         }
-    };
-    
-    if (synchronously) {
-        setupStack();
-    } else {
-        // jump to background queue since addPersistentStoreWithType can take an unknown amount of time (if `synchrounously == YES`)
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-            setupStack();
+        // dispatch_sync wait for our UI thread to be ready
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            callback(TRUE, nil);
         });
-    }
-}
-
-
-#pragma mark - Filenames
-
-- (NSString *)dataModelFilename {
-    return @"CoreDataNov2015";
-}
-
-- (NSString *)storeFilename {
-    return @"CoreDataNov2015.sqlite";
+    });
 }
 
 
 #pragma mark - Saving
 
-- (void)save {
+- (void)saveToDisk {
     // saves both main context and private context (which will save to disk)
     if (!self.privateDiskContext.hasChanges && !self.managedObjectContext.hasChanges) return;
     
