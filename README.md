@@ -6,7 +6,7 @@
 [![Platform](https://img.shields.io/cocoapods/p/KTZCoreDataStack.svg?style=flat)](http://cocoapods.org/pods/KTZCoreDataStack)
 
 ## About
-This is a template for a Core Data stack which can be used in apps needing basic support for background writes, main thread access, and background context for work. It has been ported to Swift (3) which can be found [here](https://github.com/popwarsweet/CoreDataStack).
+This is a template for a Core Data stack which can be used in apps needing basic support for background writes, main thread access, and a background context for work. It has been ported to Swift (3) which can be found [here](https://github.com/popwarsweet/CoreDataStack).
 
 ## Example
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
