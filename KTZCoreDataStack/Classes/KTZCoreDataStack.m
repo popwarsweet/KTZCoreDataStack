@@ -128,12 +128,14 @@
                                           error:&secondTryError];
                 
                 // respond w/ error
-                if (secondTryError && callback) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        callback(NO, secondTryError);
-                    });
+                if (secondTryError) {
+                    if (callback) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            callback(NO, secondTryError);
+                        });
+                    }
+                    return;
                 }
-                return;
             } else {
                 // respond w/ error if user didn't want to delete outdated/corrupt store
                 if (callback) {
