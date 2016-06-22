@@ -4,8 +4,5 @@ target 'KTZCoreDataStack_Example' do
   pod 'KTZCoreDataStack', :path => '../'
 
   target 'KTZCoreDataStack_Tests' do
-    inherit! :search_paths
-
-    
   end
 end
