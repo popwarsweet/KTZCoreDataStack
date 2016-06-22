@@ -113,32 +113,43 @@
                                 options:options
                                   error:&firstTryError];
         
-        if (firstTryError && dumpInvalidStore) {
-            // remove the old store (all of our data can be re-built)
-            [manager removeItemAtURL:storeUrl
-                               error:nil];
-            
-            NSError *secondTryError = nil;
-            [psc addPersistentStoreWithType:storeType
-                              configuration:nil
-                                        URL:storeUrl
-                                    options:options
-                                      error:&secondTryError];
-            
-            // respond w/ error
-            dispatch_async(dispatch_get_main_queue(), ^{
-                callback(NO, secondTryError);
-            });
-        } else {
-            // respond w/ error if user didn't want to delete outdated/corrupt store
-            dispatch_async(dispatch_get_main_queue(), ^{
-                callback(NO, firstTryError);
-            });
+        if (firstTryError) {
+            if (dumpInvalidStore) {
+                NSLog(@"dumping old core data store, will retry to open clean store");
+                // remove the old store (all of our data can be re-built)
+                [manager removeItemAtURL:storeUrl
+                                   error:nil];
+                
+                NSError *secondTryError = nil;
+                [psc addPersistentStoreWithType:storeType
+                                  configuration:nil
+                                            URL:storeUrl
+                                        options:options
+                                          error:&secondTryError];
+                
+                // respond w/ error
+                if (secondTryError && callback) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        callback(NO, secondTryError);
+                    });
+                }
+                return;
+            } else {
+                // respond w/ error if user didn't want to delete outdated/corrupt store
+                if (callback) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        callback(NO, firstTryError);
+                    });
+                }
+                return;
+            }
         }
         // dispatch_sync wait for our UI thread to be ready
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            callback(TRUE, nil);
-        });
+        if (callback) {
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                callback(TRUE, nil);
+            });
+        }
     });
 }
 
