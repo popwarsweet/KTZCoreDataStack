@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'KTZCoreDataStack'
-  s.version          = '0.1.0'
+  s.version          = '0.1.2'
   s.summary          = 'A starting point for a Core Data app w/ non-blocking disk saves and background context for performing work.'
 
 # This description is used to generate tags and improve search results.
@@ -25,7 +25,7 @@ This is a template for a Core Data stack which can be used in apps needing basic
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Kyle Zaragoza' => 'popwarsweet@gmail.com' }
-  s.source           = { :git => 'https://github.com/<GITHUB_USERNAME>/KTZCoreDataStack.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/popwarsweet/KTZCoreDataStack.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '7.0'
