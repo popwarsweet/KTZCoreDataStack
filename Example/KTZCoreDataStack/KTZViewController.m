@@ -7,9 +7,10 @@
 //
 
 #import "KTZViewController.h"
+#import "KTZCoreDataStack.h"
 
 @interface KTZViewController ()
-
+@property (nonatomic, strong) KTZCoreDataStack *coreDataStack;
 @end
 
 @implementation KTZViewController
@@ -18,12 +19,15 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
-}
-
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    self.coreDataStack = [[KTZCoreDataStack alloc] initWithDataModelFilename:@"ExampleModel"
+                                                               storeFilename:@"ExampleFilename"
+                                                                    callback:^(BOOL success, NSError * _Nullable error) {
+                                                                        if (success) {
+                                                                            NSLog(@"successfully opened core data store");
+                                                                        } else {
+                                                                            NSLog(@"failed to open core data store: %@", error);
+                                                                        }
+                                                                    }];
 }
 
 @end
