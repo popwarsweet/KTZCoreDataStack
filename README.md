@@ -1,6 +1,6 @@
 # KTZCoreDataStack
 
-[![CI Status](http://img.shields.io/travis/Kyle Zaragoza/KTZCoreDataStack.svg?style=flat)](https://travis-ci.org/Kyle Zaragoza/KTZCoreDataStack)
+[![CI Status](http://img.shields.io/travis/popwarsweet/KTZCoreDataStack.svg?style=flat)](https://travis-ci.org/popwarsweet/KTZCoreDataStack)
 [![Version](https://img.shields.io/cocoapods/v/KTZCoreDataStack.svg?style=flat)](http://cocoapods.org/pods/KTZCoreDataStack)
 [![License](https://img.shields.io/cocoapods/l/KTZCoreDataStack.svg?style=flat)](http://cocoapods.org/pods/KTZCoreDataStack)
 [![Platform](https://img.shields.io/cocoapods/p/KTZCoreDataStack.svg?style=flat)](http://cocoapods.org/pods/KTZCoreDataStack)
