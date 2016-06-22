@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		274311D41D1B0A4F00884A45 /* ExampleModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 274311D21D1B0A4F00884A45 /* ExampleModel.xcdatamodeld */; };
-		274311FD1D1B13F700884A45 /* KTZCoreDataStack.m in Sources */ = {isa = PBXBuildFile; fileRef = 274311FA1D1B13F700884A45 /* KTZCoreDataStack.m */; };
-		274311FE1D1B13F700884A45 /* NSURL+DocumentsDirectory.m in Sources */ = {isa = PBXBuildFile; fileRef = 274311FC1D1B13F700884A45 /* NSURL+DocumentsDirectory.m */; };
 		6003F58E195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
 		6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58F195388D20070C39A /* CoreGraphics.framework */; };
 		6003F592195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
@@ -39,10 +37,6 @@
 /* Begin PBXFileReference section */
 		1BB3C68FE1C918D14FC31C29 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		274311D31D1B0A4F00884A45 /* ExampleModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = ExampleModel.xcdatamodel; sourceTree = "<group>"; };
-		274311F91D1B13F700884A45 /* KTZCoreDataStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KTZCoreDataStack.h; path = ../KTZCoreDataStack/Classes/KTZCoreDataStack.h; sourceTree = "<group>"; };
-		274311FA1D1B13F700884A45 /* KTZCoreDataStack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KTZCoreDataStack.m; path = ../KTZCoreDataStack/Classes/KTZCoreDataStack.m; sourceTree = "<group>"; };
-		274311FB1D1B13F700884A45 /* NSURL+DocumentsDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSURL+DocumentsDirectory.h"; path = "../KTZCoreDataStack/Classes/NSURL+DocumentsDirectory.h"; sourceTree = "<group>"; };
-		274311FC1D1B13F700884A45 /* NSURL+DocumentsDirectory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSURL+DocumentsDirectory.m"; path = "../KTZCoreDataStack/Classes/NSURL+DocumentsDirectory.m"; sourceTree = "<group>"; };
 		6003F58A195388D20070C39A /* KTZCoreDataStack_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KTZCoreDataStack_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6003F58D195388D20070C39A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		6003F58F195388D20070C39A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -91,21 +85,9 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		274311F81D1B13E100884A45 /* KTZCoreDataStack */ = {
-			isa = PBXGroup;
-			children = (
-				274311F91D1B13F700884A45 /* KTZCoreDataStack.h */,
-				274311FA1D1B13F700884A45 /* KTZCoreDataStack.m */,
-				274311FB1D1B13F700884A45 /* NSURL+DocumentsDirectory.h */,
-				274311FC1D1B13F700884A45 /* NSURL+DocumentsDirectory.m */,
-			);
-			name = KTZCoreDataStack;
-			sourceTree = "<group>";
-		};
 		6003F581195388D10070C39A = {
 			isa = PBXGroup;
 			children = (
-				274311F81D1B13E100884A45 /* KTZCoreDataStack */,
 				60FF7A9C1954A5C5007DD14C /* Podspec Metadata */,
 				6003F593195388D20070C39A /* Example for KTZCoreDataStack */,
 				6003F5B5195388D20070C39A /* Tests */,
@@ -290,8 +272,6 @@
 			files = (
 				6003F59E195388D20070C39A /* KTZAppDelegate.m in Sources */,
 				6003F5A7195388D20070C39A /* KTZViewController.m in Sources */,
-				274311FD1D1B13F700884A45 /* KTZCoreDataStack.m in Sources */,
-				274311FE1D1B13F700884A45 /* NSURL+DocumentsDirectory.m in Sources */,
 				274311D41D1B0A4F00884A45 /* ExampleModel.xcdatamodeld in Sources */,
 				6003F59A195388D20070C39A /* main.m in Sources */,
 			);
